@@ -1,6 +1,6 @@
 
 
-import os
+import os, re
 
 
 
@@ -249,25 +249,16 @@ def getStats(team, file,stats, year):
 	
 	
 	
-	count = 0
+
+	regex = r'(All Games</td>\\r\\n    <td>)(\d+)(.)(\d+)'   
+	match = re.search(regex, stattext.read().replace('\n', ''))
+	#print("Wins: %s" % (match.group(2)))
+	#print("Losses: %s" % (match.group(4)))
 	
-	for line in stattext:
-		for i in range(len(line)):
-			if i>=9 and line[i-9:i]=="All Games" and team.record=="":					#this piece determines the team's record
-				for j in range(i+17, len(line)):
-					
-					if line[j]=="<":
-						team.record = line[i+17:i+17+count]
-						break
-					
-					count = count + 1
-
-
-	for i in range (len(team.record)):
-		if team.record[i]=="-":
-			team.wins = int(team.record[:i])											#determines the teams win total
-			team.losses = int(team.record[i+1:])										#determines the teams loss total
-
+	
+	team.wins = int(match.group(2))											#determines the teams win total
+	team.losses = int(match.group(4))										#determines the teams loss total
+	
 	if team.losses==0:
 		team.winrate = 1.0
 	else: team.winrate = float(team.wins)/(team.wins+team.losses)
@@ -277,23 +268,15 @@ def getStats(team, file,stats, year):
 	
 	
 	stattext = open(file, "r")
-	count = 0
-	for line in stattext:
-		for i in range(len(line)):
-			if i>=16 and line[i-16:i]==">vs. FBS Winning" and team.fbsGoodRecord=="":		#determines the teams record/wins/losses/winrate against FBS teams with winning records
-				for j in range(i+17, len(line)):
-					
-					if line[j]=="<":
-						team.fbsGoodRecord = line[i+17:i+17+count]
-						break
-					
-					count = count + 1
+	regex = r'(>vs. FBS Winning</td>\\r\\n    <td>)(\d+)(.)(\d+)'   
+	match = re.search(regex, stattext.read().replace('\n', ''))
+	#print("Wins: %s" % (match.group(2)))
+	#print("Losses: %s" % (match.group(4)))
+	
 
 
-	for i in range (len(team.fbsGoodRecord)):
-		if team.fbsGoodRecord[i]=="-":
-			team.fbsGoodWins = int(team.fbsGoodRecord[:i])			
-			team.fbsGoodLosses = int(team.fbsGoodRecord[i+1:])		
+	team.fbsGoodWins = int(match.group(2))			
+	team.fbsGoodLosses = int(match.group(4))		
 
 	if team.fbsGoodLosses==0:
 		team.fbsGoodWinrate = 1.0
@@ -301,48 +284,30 @@ def getStats(team, file,stats, year):
 	
 	
 	
+
 	stattext = open(file, "r")
-	count = 0
-	for line in stattext:
-		for i in range(len(line)):
-			if i>=20 and line[i-20:i]==">vs. FBS Non-Winning" and team.fbsBadRecord=="":		#determines the teams record/wins/losses/winrate against FBS teams with winning records	
-				for j in range(i+17, len(line)):
-					
-					if line[j]=="<":
-						team.fbsBadRecord = line[i+17:i+17+count]
-						break
-					
-					count = count + 1
-
-
-	for i in range (len(team.fbsBadRecord)):
-		if team.fbsBadRecord[i]=="-":
-			team.fbsBadWins = int(team.fbsBadRecord[:i])			
-			team.fbsBadLosses = int(team.fbsBadRecord[i+1:])		
+	regex = r'(>vs. FBS Non-Winning</td>\\r\\n    <td>)(\d+)(.)(\d+)'   
+	match = re.search(regex, stattext.read().replace('\n', ''))
+	#print("Wins: %s" % (match.group(2)))
+	#print("Losses: %s" % (match.group(4)))
+			
+	team.fbsBadWins = int(match.group(2))			
+	team.fbsBadLosses = int(match.group(4))		
 
 	if team.fbsBadLosses==0:
 		team.fbsBadWinrate = 1.0
 	else: team.fbsBadWinrate = float(team.fbsBadWins)/(team.fbsBadWins+team.fbsBadLosses)
 	
 	
+	
 	stattext = open(file, "r")
-	count = 0
-	for line in stattext:
-		for i in range(len(line)):
-			if i>=14 and line[i-14:i]=="vs. FCS (I-AA)" and team.fcsRecord=="":					#determines the teams record/wins/losses/winrate against FCS
-				for j in range(i+17, len(line)):
-					
-					if line[j]=="<":
-						team.fcsRecord = line[i+17:i+17+count]
-						break
-					
-					count = count + 1
-
-
-	for i in range (len(team.fcsRecord)):
-		if team.fcsRecord[i]=="-":
-			team.fcsWins = int(team.fcsRecord[:i])			
-			team.fcsLosses = int(team.fcsRecord[i+1:])		
+	regex = r'(vs. FCS \(I-AA\)</td>\\r\\n    <td>)(\d+)(.)(\d+)'   
+	match = re.search(regex, stattext.read().replace('\n', ''))
+	#print("Wins: %s" % (match.group(2)))
+	#print("Losses: %s" % (match.group(4)))
+		
+	team.fcsWins = int(match.group(2))			
+	team.fcsLosses = int(match.group(4))		
 
 	if team.fcsLosses==0:
 		team.fcsWinrate = 1.0
@@ -351,23 +316,12 @@ def getStats(team, file,stats, year):
 	
 	
 	stattext = open(file, "r")
-	count = 0
-	for line in stattext:
-		for i in range(len(line)):
-			if i>=16 and line[i-16:i]==">vs. FBS Power 5" and team.pFiveRecord=="":				#determines the teams record/wins/losses/winrate against FCS
-				for j in range(i+17, len(line)):
-					
-					if line[j]=="<":
-						team.pFiveRecord = line[i+17:i+17+count]
-						break
-					
-					count = count + 1
-
-
-	for i in range (len(team.pFiveRecord)):
-		if team.pFiveRecord[i]=="-":
-			team.pFiveWins = int(team.pFiveRecord[:i])			
-			team.pFiveLosses = int(team.pFiveRecord[i+1:])		
+	regex = r'(>vs. FBS Power 5</td>\\r\\n    <td>)(\d+)(.)(\d+)'   
+	match = re.search(regex, stattext.read().replace('\n', ''))
+	#print("Wins: %s" % (match.group(2)))
+	#print("Losses: %s" % (match.group(4)))
+	team.pFiveWins = int(match.group(2))			
+	team.pFiveLosses = int(match.group(4))		
 
 	if team.pFiveLosses==0:
 		team.pFiveWinrate = 1.0
@@ -412,31 +366,22 @@ def getStats(team, file,stats, year):
 	count2 = 0
 	stattext = open(file, "r")
 	
-	for line in stattext:
-		for i in range(len(line)):
-			if i>=11 and line[i-11:i]=="Points/Game" and team.pointsPerGameScored==None:						#This code determines the points per game scored by AND on a team
-				for j in range(i+17, len(line)):
+	regex = r'(Points/Game</td>\\r\\n    <td>)(\d+.\d+)(</td>\\r\\n    <td>)(\d+.\d+)'   
+	match = re.search(regex, stattext.read().replace('\n', ''))
+	
+	try:
+		team.pointsPerGameScored = float(match.group(2))
+	except ValueError:
+		team.pointsPerGameScored = -1
 					
-					if line[j]=="<":
-						try:
-							team.pointsPerGameScored = float(line[i+17:i+17+count])
-						except ValueError:
-							team.pointsPerGameScored = -1
-						for k in range(i+34+count, len(line)):
-							if line[k]=="<":
-								try:
-									team.pointsPerGameAllowed = float(line[i+34+count:i+34+count+count2])		   	#The number is a float, determined by 2 "counts" the counts determine the length of the strings
-								except ValueError:
-									team.pointsPerGameAllowed = -1
-								if team.pointsPerGameAllowed < 1:
-									team.pointsPerGameAllowed = 1
-								break																			#These counts are done to handle cases where a team's points per game is less than 10.0
-							count2= count2 + 1
-							
-						break
-
-					count = count + 1
-
+	try:
+		team.pointsPerGameAllowed = float(match.group(4))		   	#The number is a float, determined by 2 "counts" the counts determine the length of the strings
+	except ValueError:
+		team.pointsPerGameAllowed = -1
+	if team.pointsPerGameAllowed < 1:
+		team.pointsPerGameAllowed = 1
+					
+	
 
 	team.pointsPerGameDiffRaw = team.pointsPerGameScored - team.pointsPerGameAllowed							#This code determines the 2 stats: pointsPerGameDiffRaw and pointsPerGameDiffPerc
 	if team.pointsPerGameAllowed > 1.0:
@@ -448,26 +393,12 @@ def getStats(team, file,stats, year):
 
 	count = 0
 	stattext = open(file, "r")
-	counting = False
-	countFromDash = 0
-	num = 0
-	
-	for line in stattext:
-		for i in range(len(line)):												   
-			if i>=26 and line[i-26:i]=="Rushing:  Attempts - Yards" and team.rushYards==None:			#This code determines the total rushing yards on the season (rushYards)
-				for j in range(i+22, len(line)):
-					if line[j] == " " and team.rushAttempts == None:
-						team.rushAttempts = int(line[j-count:j])
-					if line[j-1:j+1] == " -" and counting ==False:										#This code grabs the middle value in a X - X - X statistic 
-						counting = True
-						num = j																			#counting is a boolean to determine whether or not to start "counting" num is a temp variable for the index at the first "-"
-					if line[j-1:j+1]==" -" and num != j:
-						count = count -1																#-1 because of a space in the string that needs to be ignored
-						team.rushYards = int(line[i+22+countFromDash-1:i+22+count])						#countFromDash - 1 because we don't want the "-" in the variable
-						break
-					if counting == True:
-						countFromDash = countFromDash + 1												#countFromDash is a number for the chars past the "-"
-					count = count + 1
+	regex = r'(Rushing:  Attempts - Yards - TD</td>\\r\\n    <td>)(\d+) . (\d+) . (\d+)(</td>\\r\\n    <td>)(\d+) . (\d+) . (\d+)'   
+	match = re.search(regex, stattext.read().replace('\n', ''))											   
+
+	team.rushAttempts = int(match.group(2))															#-1 because of a space in the string that needs to be ignored
+	team.rushYards = int(match.group(3))						#countFromDash - 1 because we don't want the "-" in the variable
+						
 
 
 	if team.wins +team.losses != 0:
@@ -481,41 +412,9 @@ def getStats(team, file,stats, year):
 
 
 
-
-
-	count = 0
-	stattext = open(file, "r")
-	counting = False
-	countFromBracket = 0
-	num = 0
-	countDashes = 0
-	countBracket = 0
-	
-	for line in stattext:
-		for i in range(len(line)):												   
-			if i>=26 and line[i-26:i]=="Rushing:  Attempts - Yards" and team.rushYardsAllowed==None:		   #This code determines the total rushing yards allowed on the season (rushYardsAllowed)
-				for j in range(i+22, len(line)):
-					if line[j] == "-":																		   #This code grabs the middle value in a X - X - X statistic 
-						countDashes = countDashes + 1
-
-					if countDashes ==2 and line[j] == ">":
-						countBracket = countBracket+1
-
-					if countBracket ==2:
-						counting = True
-						
-					if counting:
-						count = count +1
-					if countBracket == 2 and line[j] == " ":
-						team.rushAttemptsAllowed = int(line[j-count+2:j])										#code determines the rush attempts per game against the team
-						count = 0
-						for k in range(j+3, len(line)):
-							if line[k]==" ":
-								team.rushYardsAllowed = int(line[k-count:k])
-								break
-							count = count + 1
-						break
-						
+	team.rushAttemptsAllowed = int(match.group(6))										#code determines the rush attempts per game against the team
+	team.rushYardsAllowed = int(match.group(7))
+								
 				   
 		
 	if team.wins +team.losses != 0:																				#code determines per game averages of rushing stats for and against the team
@@ -533,21 +432,12 @@ def getStats(team, file,stats, year):
 
 	count = 0
 	stattext = open(file, "r")
-	startcount = 0
-	
-	for line in stattext:
-		for i in range(len(line)):												   
-			if i>=15 and line[i-15:i]=="Passing:  Yards" and team.passYards ==None:									#passing yards by the team and against the team			  
-				for j in range(i+17, len(line)):								   
-					
-					if line[j]=="<" and team.passYards ==None:
-						team.passYards = int(line[i+17:i+17+count])
-						startcount = count +17
-					elif line[j]=="<" and count>startcount:
-						team.passYardsAllowed = int(line[i+17+startcount:i+17+count])					 
-						break
-					count = count + 1
-
+	regex = r'(>Passing:  Yards</td>\\r\\n    <td>)(\d+)(</td>\\r\\n    <td>)(\d+)'   
+	match = re.search(regex, stattext.read().replace('\n', ''))										   
+			
+	team.passYards = int(match.group(2))
+	team.passYardsAllowed = int(match.group(4))					 
+						
 
 	
 	if team.wins +team.losses != 0:
@@ -560,49 +450,17 @@ def getStats(team, file,stats, year):
 	startcount=0
 	stattext = open(file, "r")
 	
-	for line in stattext:
-		for i in range(len(line)):																				
-			if i>=53 and line[i-53:i]=="Passing:  Attempts - Completions - Interceptions - TD":						#pass attempts, completions, interceptions thrown, TDs thrown by offense
-				for j in range(i+17, len(line)):																
-					
-					if line[j]=="-" and team.passAttempts == None:
-						team.passAttempts = int(line[i+17:i+17+count])
-						startcount = count
-						
-						
-					elif line[j]=="-" and team.passCompletions == None:
-						team.passCompletions = int(line[i+19+startcount:i+17+count])
-						startcount = count
-						
-						
-					elif line[j]=="-" and team.intThrown == None:
-						team.intThrown = int(line[i+19+startcount:i+17+count])
-						startcount = count
-						
-					elif line[j]=="<" and team.passTDThrown == None:
-						team.passTDThrown = int(line[i+19+startcount:i+17+count])
-						startcount = count+17
-					
-					elif line[j]=="-" and team.passAttemptsAllowed == None:											#defensive passing stats: attempts allowed, completions allowed, ints caught, TDs allowed
-						team.passAttemptsAllowed = int(line[i+17+startcount:i+17+count])
-						startcount = count	  
-					
-					elif line[j]=="-" and team.passCompletionsAllowed == None:
-						team.passCompletionsAllowed = int(line[i+19+startcount:i+17+count])
-						startcount = count	  
-					
-					elif line[j]=="-" and team.intCaught == None:
-						team.intCaught = int(line[i+19+startcount:i+17+count]) 
-						startcount = count	  
-					
-					elif line[j]=="<" and team.passTDAllowed == None and team.intCaught!= None:
-						team.passTDAllowed = int(line[i+19+startcount:i+17+count])	 
-						startcount = count	  
-						break
-					else:
-						pass
-					
-					count = count + 1
+	regex = r'(>Passing:  Attempts - Completions - Interceptions - TD</td>\\r\\n    <td>)(\d+) . (\d+) . (\d+) . (\d+)(</td>\\r\\n    <td>)(\d+) . (\d+) . (\d+) . (\d+)'   
+	match = re.search(regex, stattext.read().replace('\n', ''))																			
+
+	team.passAttempts = int(match.group(2))
+	team.passCompletions = int(match.group(3))
+	team.intThrown = int(match.group(4))
+	team.passTDThrown = int(match.group(5))							#defensive passing stats: attempts allowed, completions allowed, ints caught, TDs allowed
+	team.passAttemptsAllowed = int(match.group(7))
+	team.passCompletionsAllowed = int(match.group(8))
+	team.intCaught = int(match.group(9))
+	team.passTDAllowed = int(match.group(10))
 	
 	if team.wins + team.losses !=0:
 		team.passYardsPerGameAllowed = 1.0*team.passYardsAllowed / (team.wins+team.losses)							#defensive passing yards per game
@@ -755,8 +613,10 @@ def main():
 	
 		year = j
 		print(year)
-		
-		os.chdir("/Users/Kyle/Desktop/Football Team HTML files/"+year)							#changes the current working directory to the "year" being examined in the for loop
+		try:
+			os.chdir("/Users/Kyle/Desktop/Football Team HTML files/"+year)
+		except:
+			os.chdir("/home/kyle/Desktop/Football Team HTML files/"+year)							#changes the current working directory to the "year" being examined in the for loop
 		statfile = open(""+year+" Stats.txt", "w")												#creates a txt file to store the stats in an excel-friendly format
 		stats = "TEAM\tmako\tajax\tDr/gm\tOp/gm\tDp/gm\tOpts/gm\tDpts/gm\twinr\t"				#the text that will populate the txt file for the excel file
 		
@@ -776,7 +636,7 @@ def main():
 				
 		
 		statfile.write(stats)																	#writes the text from "stats" to the excel-friendly file
-	print(rankweight,"/",totalTeams)															#this determines the ratio of ranked teams to total teams in a certain category 		
+	#print(rankweight,"/",totalTeams)															#this determines the ratio of ranked teams to total teams in a certain category 		
 	 
 
 main()
