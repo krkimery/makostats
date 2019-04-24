@@ -36,10 +36,21 @@ def get_html_for_team(team, year):
 #print get_team_name(2018)
 
 
+#STATS
+#soup.find_all("td", class_="statistic-name")
+#for td in soup.find_all("td", class_="statistic-name"):
+    #print td.text, td.find_next().text
 
+    #can probably split attrs/stats based off ":" and "-"....
+    #Rushing:  Attempts - Yards - TD
+    #could be... self.RushingAttempts, self.RushingYards, self.RushingTD by splitting on : and - and re-combine
+    #corresponding stats would need to be grouped this way as well...
+    #569 - 2143 - 24
+    #self.RushingAttempts=569, self.RushingYards=2143... by splitting on - again
 
-
-
+#win/loss splits:
+#for td in soup.find_all("td", class_="split-name"):
+    #print td.text, td.find_next().text
 
 
 
