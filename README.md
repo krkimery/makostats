@@ -1,6 +1,9 @@
 # makostats
 Football Stats project: scrape for data, then rank teams
 
+## Setup
+Must have installed: requests, bs4, mock
+
 
 # (Ongoing) Refactor
 

@@ -32,9 +32,6 @@ def get_html_for_team(team, year):
     return resp.text
 
 
-#print get_html_for_team("Texas Longhorns", 2018)
-#print get_team_name(2018)
-
 
 
 
