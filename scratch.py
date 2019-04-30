@@ -3,11 +3,13 @@
 """
 
 from fbScrapeStats import get_html_for_team
+from fbConsts import DATA
 from bs4 import BeautifulSoup
+import re
 
 
 def testy():
-    return BeautifulSoup( get_html_for_team("Texas Longhorns", 2018), "html.parser")
+    return BeautifulSoup(get_html_for_team("Texas Longhorns", 2018), "html.parser")
 
 
 class Team:
@@ -17,12 +19,26 @@ class Team:
         self.build_stat_attrs()
         self.build_split_attrs()
         self.build_per_game_stats()
+        self.build_custom_attrs()
 
     def build_custom_attrs(self):
-        #team name
-        #conference
-        #spread between points scored and allowed
-        pass
+        title_regex = re.search(r"(\d{4}) (\D*\w*\D*)", self.soup.title.string)
+        self.year = int(title_regex.groups()[0])
+        self.team = title_regex.groups()[1]
+        self.url = DATA[self.team].get("URL", 999)
+        self.conference = DATA[self.team].get("Conference", "Other")
+        self.Point_Differential_Per_Game = self.Scoring_Points_Per_Game-self.Defense_Scoring_Points_Per_Game
+        self.Yardage_Differential_Per_Game = self.Total_Offense_Yards_Per_Game-self.Defense_Total_Offense_Yards_Per_Game
+        self.Winrate =  self.Wins_All_Games/(self.Wins_All_Games+self.Losses_All_Games) \
+                        if self.Wins_All_Games > 0 else 0.0
+        self.FBS_Winning_Winrate = self.Wins_vs_FBS_Winning / (self.Wins_vs_FBS_Winning + self.Losses_vs_FBS_Winning) \
+                                    if self.Wins_vs_FBS_Winning > 0 else 0.0
+
+        self.FBS_Losing_Winrate = self.Wins_vs_FBS_Non_Winning / (self.Wins_vs_FBS_Non_Winning + self.Losses_vs_FBS_Non_Winning) \
+                                    if self.Wins_vs_FBS_Non_Winning > 0 else 0.0
+
+        self.Power_5_Winrate = self.Wins_vs_FBS_Power_5 / (self.Wins_vs_FBS_Power_5 + self.Losses_vs_FBS_Power_5) \
+                                    if self.Wins_vs_FBS_Power_5 > 0 else 0.0
 
     def build_per_game_stats(self):
         total_games = self.Wins_All_Games + self.Losses_All_Games
@@ -67,5 +83,5 @@ class Team:
 
     def _get_cleaned_stats_list(self, td):
         raw_stat_list = td.find_next().text.replace(" ", "").split("-")
-        return [float(stat.replace("%", "").replace(",", "")) if ":" not in stat
-                else float(stat.split(":")[0]) for stat in raw_stat_list]
+        return [float(stat.replace("%", "").replace(",", "")) if stat and ":" not in stat
+                else float(stat.split(":")[0]) if stat else 0.0 for stat in raw_stat_list]
