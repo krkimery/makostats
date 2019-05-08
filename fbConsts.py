@@ -2,13 +2,14 @@
     Consts file for scraping, parsing, and ranking
 
 """
+import os
 
 HTTP_HEADERS = {
                             "User-Agent":   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
                                             "(KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36",
                 }
 
-DATA_FILENAME = "data_"
+DATA_FILENAME = os.getcwd() + "\\data\\" + "data_"
 
 DATA = {
 
