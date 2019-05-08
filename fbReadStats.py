@@ -1,42 +1,68 @@
-from fbConsts import DATA
+from fbConsts import DATA, DATA_FILENAME, YEARS
+from fbScrapeStats import get_html_for_team
 import re
+import pickle
+from bs4 import BeautifulSoup
+import time
+import logging
+
 
 def build_team_from_scrape(team, year):
-	''' get a Team object built from freshly scraped data'''
-	pass
+    """get a Team object built from freshly scraped data"""
+    try:
+        new_team = Team(BeautifulSoup(get_html_for_team(team, year), "html.parser"))
+        return new_team
+    except:
+        logging.warn("Failed to build team: {} {}".format(team, year))
+        return None
 
 
 def build_all_teams_from_scrape(year):
-	'''iterate through all teams and build Team objects for each of them'''
-	pass
+    '''iterate through all teams and build Team objects for each of them'''
+    year_dict = {}
+    for team in DATA.keys():
+        year_dict[team] = build_team_from_scrape(team, year)
+        time.sleep(3)
+    return year_dict
 
 
 def build_all_teams():
-	'''loads stored Teams, builds from scrape current teams'''
-	pass
+    '''loads stored Teams, builds from scrape current teams'''
+    total_dict = {}
+    for year in YEARS:
+        total_dict.update(load_all_teams_for_year(year))
+        if year in total_dict:
+            continue
+        else:
+            total_dict[year] = build_all_teams_from_scrape(year)
+    return total_dict
 
 
-def load_stored_team(team, year):
-	'''load a pickled/stored Team from storage'''
-	pass
+def store_all_data():
+    """Store all data to disk"""
+    dict_to_be_stored = build_all_teams()
+    for year in YEARS:
+        store_data_for_year(year, dict_to_be_stored[year])
+
+
+def store_data_for_year(year, data_dict):
+    """Store the data for a given year"""
+    with open(DATA_FILENAME + str(year), "wb") as f:
+        pickle.dump(data_dict, f)
+    logging.info("Stored data for year: {}".format(year))
 
 
 def load_all_teams_for_year(year):
-	'''load all of the pickled/stored teams from storage'''
-	pass
+    '''load all of the pickled/stored teams from storage'''
+    year_dict = {}
+    try:
+        with open(DATA_FILENAME + str(year), "rb") as f:
+            year_dict.update(pickle.load(f))
+            logging.info("Loaded stored data for year: {}".format(year))
+    except:
+        logging.info("Failed to load stored data for year: {}".format(year))
 
-
-def store_team(year):
-	'''pickles/stores a team'''
-	pass
-
-'''
-team.mako = (0.6)*(team.rushYardsPerGame/180)+(0.49)*(157/team.rushYardsPerGameAllowed)+					(0.47)*(team.passYardsPerGame/238)+(0.46)*(215/team.passYardsPerGameAllowed)+					(0.67)*(team.pointsPerGameScored/31)+(0.55)*(25/team.pointsPerGameAllowed)+						(0.9)*(team.winrate/.62) -1.3*(1-(team.pFiveWins+team.pFiveLosses)/(team.fbsGoodWins+team.fbsBadWins+team.fbsGoodLosses+team.fbsBadLosses))																			-(0.5-team.fbsGoodWinrate)-(0.5-team.pFiveWinrate)-(.9-team.fbsBadWinrate)
-	
-		= (0.6) * (team.Rushing_Yards_Per_Game/180.0) + (0.49)*(157.0/team.Defense_Rushing_Yards_Per_Game) + (0.47) * (team.Passing_Yards_Per_Game/238.0) + (215.0/team.Defense_Passing_Yards_Per_Game) + (0.67)*(team.Scoring_Points_Per_Game/31.0) + (0.55)*(25.0/team.Defense_Scoring_Points_Per_Game) + (0.9)*(team.Winrate/0.62) - (1.3)*(1-(team.Wins_vs_FBS_Power_5 + team.Losses_vs_FBS_Power_5)/(team.Wins_vs_FBS_Winning + team.Wins_vs_FBS_Non_Winning + team.Losses_vs_FBS_Non_Winning + team.Losses_vs_FBS_Winning)) - (0.5 - team.FBS_Winning_Winrate) - (0.5 - team.FBS_Losing_Winrate) - (0.9 - team.Power_5_Winrate)
-	
-team.ajax = 1.2*(team.fbsGoodWinrate/0.4)+1.1*(team.pFiveWinrate/0.5)+(0.7)*((team.pointsPerGameScored-team.pointsPerGameAllowed)/7)-1.75*(1-(team.pFiveWins+team.pFiveLosses)/(team.fbsGoodWins+team.fbsBadWins+team.fbsGoodLosses+team.fbsBadLosses))-2.25*(1-team.fbsBadWinrate)
-'''
+    return year_dict
 
 
 class Team:
