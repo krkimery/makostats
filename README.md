@@ -5,6 +5,17 @@ Football Stats project: scrape for data, then rank teams
 Must have installed: requests, bs4, mock
 
 
+# Further Development
+In addition to the below refactors, this is an actively developed project. 
+
+I would like to further expand the algorithms with hand-curated ranking algorithms and play around a bit with some very 
+simple machine learning concepts.
+
+I would like to replace the existing data storage solution(s) with an object store capable of time-travel, to enable
+back-testing of ranking algorithms. Alternatively, I could pursue boring/traditional DBs. 
+
+At some point in the distant future, I would like to integrate all of this with a simple web framework (just because). 
+
 # (Ongoing) Refactor
 
 ## Status and Next tasks
