@@ -34,7 +34,9 @@ def build_all_teams():
         if year in total_dict:
             continue
         else:
-            total_dict[year] = build_all_teams_from_scrape(year)
+            new_dict = build_all_teams_from_scrape(year)
+            store_data_for_year(year, {year: new_dict})
+            total_dict[year] = new_dict
     return total_dict
 
 
