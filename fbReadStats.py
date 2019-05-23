@@ -7,24 +7,11 @@ import time
 import logging
 
 
-def build_team_from_scrape(team, year):
-    """get a Team object built from freshly scraped data"""
-    try:
-        new_team = Team(BeautifulSoup(get_html_for_team(team, year), "html.parser"))
-        return new_team
-    except:
-        logging.warn("Failed to build team: {} {}".format(team, year))
-        return None
-
-
-def build_all_teams_from_scrape(year):
-    '''iterate through all teams and build Team objects for each of them'''
-    year_dict = {}
-    for team in DATA.keys():
-        year_dict[team] = build_team_from_scrape(team, year)
-        time.sleep(3)
-    return year_dict
-
+###################################
+#
+#  EXTERNAL API
+#
+###################################
 
 def build_all_teams():
     '''loads stored Teams, builds from scrape current teams'''
@@ -38,33 +25,6 @@ def build_all_teams():
             store_data_for_year(year, {year: new_dict})
             total_dict[year] = new_dict
     return total_dict
-
-
-def store_all_data():
-    """Store all data to disk"""
-    dict_to_be_stored = build_all_teams()
-    for year in YEARS:
-        store_data_for_year(year, dict_to_be_stored[year])
-
-
-def store_data_for_year(year, data_dict):
-    """Store the data for a given year"""
-    with open(DATA_FILENAME + str(year), "wb") as f:
-        pickle.dump(data_dict, f)
-    logging.info("Stored data for year: {}".format(year))
-
-
-def load_all_teams_for_year(year):
-    '''load all of the pickled/stored teams from storage'''
-    year_dict = {}
-    try:
-        with open(DATA_FILENAME + str(year), "rb") as f:
-            year_dict.update(pickle.load(f))
-            logging.info("Loaded stored data for year: {}".format(year))
-    except:
-        logging.info("Failed to load stored data for year: {}".format(year))
-
-    return year_dict
 
 
 class Team:
@@ -140,6 +100,60 @@ class Team:
         raw_stat_list = td.find_next().text.replace(" ", "").split("-")
         return [float(stat.replace("%", "").replace(",", "")) if stat and ":" not in stat
                 else float(stat.split(":")[0]) if stat else 0.0 for stat in raw_stat_list]
+
+
+
+###################################
+#
+#  INTERNAL FUNCTIONS
+#
+###################################
+
+def build_team_from_scrape(team, year):
+    """get a Team object built from freshly scraped data"""
+    try:
+        new_team = Team(BeautifulSoup(get_html_for_team(team, year), "html.parser"))
+        return new_team
+    except:
+        logging.warn("Failed to build team: {} {}".format(team, year))
+        return None
+
+
+def build_all_teams_from_scrape(year):
+    '''iterate through all teams and build Team objects for each of them'''
+    year_dict = {}
+    for team in DATA.keys():
+        year_dict[team] = build_team_from_scrape(team, year)
+        time.sleep(3)
+    return year_dict
+
+
+def store_all_data():
+    """Store all data to disk"""
+    dict_to_be_stored = build_all_teams()
+    for year in YEARS:
+        store_data_for_year(year, dict_to_be_stored[year])
+
+
+def store_data_for_year(year, data_dict):
+    """Store the data for a given year"""
+    with open(DATA_FILENAME + str(year), "wb") as f:
+        pickle.dump(data_dict, f)
+    logging.info("Stored data for year: {}".format(year))
+
+
+def load_all_teams_for_year(year):
+    '''load all of the pickled/stored teams from storage'''
+    year_dict = {}
+    try:
+        with open(DATA_FILENAME + str(year), "rb") as f:
+            year_dict.update(pickle.load(f))
+            logging.info("Loaded stored data for year: {}".format(year))
+    except:
+        logging.info("Failed to load stored data for year: {}".format(year))
+
+    return year_dict
+
 
 
 
