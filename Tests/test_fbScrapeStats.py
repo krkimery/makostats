@@ -1,7 +1,7 @@
 from unittest import TestCase
 import mock
-from fbScrapeStats import get_html_for_team, get_team_name
-from fbConsts import TEAMS
+from fbScrapeStats import get_html_for_team, _get_team_name, _get_all_html
+from fbConsts import TEAMS, URL_LIST
 
 
 class FbScrapeStatsTests(TestCase):
@@ -24,7 +24,13 @@ class FbScrapeStatsTests(TestCase):
         mock_soup_obj = mock.Mock()
         mock_soup_obj.title.string = "random html gibberish 2012 Delaware Warriors"
         mock_soup.return_value = mock_soup_obj
-        result = get_team_name(2012)
+        result = _get_team_name(2012)
         self.assertTrue(mock_get.called)
         self.assertTrue(mock_soup.called)
         self.assertEqual(len(TEAMS), len(result))
+
+    @mock.patch("fbScrapeStats.time.sleep")
+    @mock.patch("fbScrapeStats.requests.get")
+    def test_get_all_html(self, mock_get, mock_sleep):
+        result = _get_all_html(2002)
+        self.assertEqual(len(URL_LIST), len(result))
