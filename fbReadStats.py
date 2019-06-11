@@ -1,11 +1,11 @@
-from fbConsts import DATA, DATA_FILENAME, YEARS
+from fbConsts import DATA, DATA_FILENAME, YEARS, JSON_FILE
 from fbScrapeStats import get_html_for_team
 import re
 import pickle
 from bs4 import BeautifulSoup
 import time
 import logging
-
+import json
 
 ###################################
 #
@@ -18,16 +18,18 @@ def build_all_teams():
     total_dict = {}
     for year in YEARS:
         total_dict.update(load_all_teams_for_year(year))
+        logging.info("year: {}".format(year))
         if year in total_dict:
             continue
         else:
+            logging.info( "total dict keys: {}".format(total_dict.keys()))
             new_dict = build_all_teams_from_scrape(year)
             store_data_for_year(year, {year: new_dict})
             total_dict[year] = new_dict
     return total_dict
 
 
-class Team:
+class Team(object):
 
     def __init__(self, soup_obj):
         self.soup = soup_obj
@@ -101,6 +103,18 @@ class Team:
         return [float(stat.replace("%", "").replace(",", "")) if stat and ":" not in stat
                 else float(stat.split(":")[0]) if stat else 0.0 for stat in raw_stat_list]
 
+    @classmethod
+    def load_from_json(cls, json_dict):
+        new_team = object.__new__(cls)
+        new_team.__dict__.update(json_dict)
+        return new_team
+
+    def dump_to_json(self):
+        temp_attr = self.soup
+        del(self.__dict__["soup"])
+        returned_json = json.dumps(self.__dict__)
+        self.soup = temp_attr
+        return returned_json
 
 
 ###################################
@@ -146,14 +160,35 @@ def load_all_teams_for_year(year):
     '''load all of the pickled/stored teams from storage'''
     year_dict = {}
     try:
-        with open(DATA_FILENAME + str(year), "rb") as f:
-            year_dict.update(pickle.load(f))
-            logging.info("Loaded stored data for year: {}".format(year))
+        year_dict[year] = load_from_json(year)
+        return year_dict
+    except Exception as e:
+        logging.warn(e)
+    try:
+        year_dict = load_from_pickle(year)
     except:
         logging.info("Failed to load stored data for year: {}".format(year))
 
     return year_dict
 
+def load_from_json(year):
+    """Load the stored data from the json data dump"""
+    with open(JSON_FILE, "r") as data_file:
+        json_data = json.load(data_file)[str(year)]
+        logging.info("Loaded JSON data for year: {}".format(year))
+        returned_data = {}
+        for team, team_attrs in json_data.iteritems():
+            returned_data[team] = Team.load_from_json(team_attrs)
+        return returned_data
+
+
+def load_from_pickle(year):
+    """Load the stored data from the pickle data dump"""
+    year_dict = {}
+    with open(DATA_FILENAME + str(year), "rb") as f:
+        year_dict.update(pickle.load(f))
+        logging.info("Loaded stored data for year: {}".format(year))
+    return year_dict
 
 
 

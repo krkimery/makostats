@@ -11,6 +11,8 @@ HTTP_HEADERS = {
 
 DATA_FILENAME = os.getcwd() + "\\data\\" + "data_"
 
+JSON_FILE = "json_data"
+
 DATA = {
 
     'Florida State Seminoles':          {"URL": 234,

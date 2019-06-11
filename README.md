@@ -30,6 +30,9 @@ I need to determine how I want to store older data. Pickling is memory and time 
 store data as JSON. Create load_from_JSON and dump_to_JSON class methods on Team. Build dynamic init. Long term ideas
 to explore: zodb (object store which may support time-travel), traditional DBs. 
 
+    I have begun the interim option of JSON storage. I can now read from a simple JSON file. I need to add in 
+    functionality to dump/save to JSON.
+
 
 ## Consts File
 This should be done, barring any additions at a later date. 
