@@ -110,10 +110,7 @@ class Team(object):
         return new_team
 
     def dump_to_json(self):
-        temp_attr = self.soup
-        del(self.__dict__["soup"])
-        returned_json = json.dumps(self.__dict__)
-        self.soup = temp_attr
+        returned_json = json.dumps({key: self.__dict__[key] for key in self.__dict__ if key != "soup"})
         return returned_json
 
 
@@ -155,6 +152,13 @@ def store_data_for_year(year, data_dict):
         pickle.dump(data_dict, f)
     logging.info("Stored data for year: {}".format(year))
 
+def store_data_to_json_for_year(year, data_dict):
+    """Store the data for a given year as json"""
+    #read in ALL JSON for ALL years ... load_all_from_json
+    #create new stored_dict for a year.. stored_dict = {}, stored_dict[year] = {}.. key str/int?
+    #create a set of all keys in old + new data
+    #iterate through this set, if its in the new dict, .dump_to_json it, else leave the old_data as json data.. not team obj
+
 
 def load_all_teams_for_year(year):
     '''load all of the pickled/stored teams from storage'''
@@ -173,14 +177,18 @@ def load_all_teams_for_year(year):
 
 def load_from_json(year):
     """Load the stored data from the json data dump"""
-    with open(JSON_FILE, "r") as data_file:
-        json_data = json.load(data_file)[str(year)]
-        logging.info("Loaded JSON data for year: {}".format(year))
-        returned_data = {}
-        for team, team_attrs in json_data.iteritems():
-            returned_data[team] = Team.load_from_json(team_attrs)
-        return returned_data
+    json_data = load_all_from_json()[str(year)]
+    logging.info("Loaded JSON data for year: {}".format(year))
+    returned_data = {}
+    for team, team_attrs in json_data.iteritems():
+        returned_data[team] = Team.load_from_json(team_attrs)
+    return returned_data
 
+def load_all_from_json():
+    """Load all teams for all years from JSON"""
+    with open(JSON_FILE, "r") as data_file:
+        json_data = json.load(data_file)
+    return json_data
 
 def load_from_pickle(year):
     """Load the stored data from the pickle data dump"""
