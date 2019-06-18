@@ -131,7 +131,7 @@ def build_team_from_scrape(team, year):
 
 
 def build_all_teams_from_scrape(year):
-    '''iterate through all teams and build Team objects for each of them'''
+    """iterate through all teams and build Team objects for each of them"""
     year_dict = {}
     for team in DATA.keys():
         year_dict[team] = build_team_from_scrape(team, year)
@@ -143,33 +143,33 @@ def store_all_data():
     """Store all data to disk"""
     dict_to_be_stored = build_all_teams()
     for year in YEARS:
-        store_data_for_year(year, dict_to_be_stored[year])
+        store_data_to_json_for_year(year, dict_to_be_stored[year])
 
 
 def store_data_for_year(year, data_dict):
-    """Store the data for a given year"""
+    """DEPRECATED: Store the data for a given year"""
     with open(DATA_FILENAME + str(year), "wb") as f:
         pickle.dump(data_dict, f)
     logging.info("Stored data for year: {}".format(year))
 
 def store_data_to_json_for_year(year, data_dict):
     """Store the data for a given year as json"""
-    #read in ALL JSON for ALL years ... load_all_from_json
-    #create new stored_dict for a year.. stored_dict = {}, stored_dict[year] = {}.. key str/int?
-    #create a set of all keys in old + new data
-    #iterate through this set, if its in the new dict, .dump_to_json it, else leave the old_data as json data.. not team obj
+    all_existing_json = load_all_from_json()
+    new_stored_json_dict = {}
+    for team, teamObj in data_dict.iteritems():
+        new_stored_json_dict[team] = teamObj.dump_to_json()
+
+    all_existing_json[str(year)] = new_stored_json_dict
+    with open(JSON_FILE, "wb") as new_json:
+        json.dump(all_existing_json, new_json)
 
 
 def load_all_teams_for_year(year):
-    '''load all of the pickled/stored teams from storage'''
+    """load all of the json stored teams from storage"""
     year_dict = {}
     try:
         year_dict[year] = load_from_json(year)
         return year_dict
-    except Exception as e:
-        logging.warn(e)
-    try:
-        year_dict = load_from_pickle(year)
     except:
         logging.info("Failed to load stored data for year: {}".format(year))
 
@@ -191,7 +191,7 @@ def load_all_from_json():
     return json_data
 
 def load_from_pickle(year):
-    """Load the stored data from the pickle data dump"""
+    """DEPRECATED: Load the stored data from the pickle data dump"""
     year_dict = {}
     with open(DATA_FILENAME + str(year), "rb") as f:
         year_dict.update(pickle.load(f))
