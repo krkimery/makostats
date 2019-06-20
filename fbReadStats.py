@@ -146,12 +146,6 @@ def store_all_data():
         store_data_to_json_for_year(year, dict_to_be_stored[year])
 
 
-def store_data_for_year(year, data_dict):
-    """DEPRECATED: Store the data for a given year"""
-    with open(DATA_FILENAME + str(year), "wb") as f:
-        pickle.dump(data_dict, f)
-    logging.info("Stored data for year: {}".format(year))
-
 def store_data_to_json_for_year(year, data_dict):
     """Store the data for a given year as json"""
     all_existing_json = load_all_from_json()
@@ -190,6 +184,13 @@ def load_all_from_json():
         json_data = json.load(data_file)
     return json_data
 
+
+###################################
+#
+#  DEPRECATED FUNCTIONS
+#
+###################################
+
 def load_from_pickle(year):
     """DEPRECATED: Load the stored data from the pickle data dump"""
     year_dict = {}
@@ -198,7 +199,11 @@ def load_from_pickle(year):
         logging.info("Loaded stored data for year: {}".format(year))
     return year_dict
 
-
+def store_data_for_year(year, data_dict):
+    """DEPRECATED: Store the data for a given year"""
+    with open(DATA_FILENAME + str(year), "wb") as f:
+        pickle.dump(data_dict, f)
+    logging.info("Stored data for year: {}".format(year))
 
 
 

@@ -14,7 +14,8 @@ simple machine learning concepts.
 I would like to replace the existing data storage solution(s) with an object store capable of time-travel, to enable
 back-testing of ranking algorithms. Alternatively, I could pursue boring/traditional DBs. 
 
-At some point in the distant future, I would like to integrate all of this with a simple web framework (just because). 
+At some point in the distant future, I would like to integrate all of this with a simple web framework (just because). A
+more medium-term front-end development would be to use a simple plotting library like matplotlib to visualize data. 
 
 # (Ongoing) Refactor
 
@@ -23,15 +24,13 @@ Working release. All initial functionality at least at a trivial level. Check st
 rank teams based upon ranking algorithms defined in a separate algos module. Team objects are created with dynamic attrs
 based off of the elements scraped & cleaned from website. 
 
-I need to create a full fledged test case for the new class, complete with dummy html. In general, new functionality 
-demands tests. I've been too lax with testing thus far.  
+Tests are complete but could (like always) be added to and improved upon. 
 
 I need to determine how I want to store older data. Pickling is memory and time inefficient. Intermediate improvement: 
 store data as JSON. Create load_from_JSON and dump_to_JSON class methods on Team. Build dynamic init. Long term ideas
 to explore: zodb (object store which may support time-travel), traditional DBs. 
 
-    I have begun the interim option of JSON storage. I can now read from a simple JSON file. I need to add in 
-    functionality to dump/save to JSON.
+The JSON refactor is complete!
 
 
 ## Consts File
@@ -39,9 +38,8 @@ This should be done, barring any additions at a later date.
 
 
 ## Storage
-Currently pickling, intermediate solution is JSON. In the future, I will look into using some kind of database, possibly
-zodb. This works... sort of... pickle has shortcomings, for temporary storage (so I can stop hitting the website) this is
-fine. But I will definitely need to look into a traditional DB. 
+The JSON refactor is complete! Longer term I would like to look into time-travelable DBs (zodb?) or a more traditional 
+DB. 
 
 ## Testing
 Testing is important and worthwhile.
