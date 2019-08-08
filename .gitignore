@@ -1,0 +1,6 @@
+venv/tcl/
+venv/Scripts/
+venv/Lib/
+venv/Include/
+.idea/
+*.pyc
