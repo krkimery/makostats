@@ -1,5 +1,5 @@
 # makostats
-[![Coverage Status](https://coveralls.io/repos/github/krkimery/makostats/badge.svg?branch=master)](https://coveralls.io/github/krkimery/makostats?branch=master)
+[![Build Status](https://travis-ci.org/krkimery/makostats.svg?branch=master)](https://travis-ci.org/krkimery/makostats)[![Coverage Status](https://coveralls.io/repos/github/krkimery/makostats/badge.svg?branch=master)](https://coveralls.io/github/krkimery/makostats?branch=master)
 
 Football Stats project: scrape for data, then rank teams
 
