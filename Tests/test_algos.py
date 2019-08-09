@@ -1,7 +1,7 @@
 
 from unittest import TestCase
-from algos import mako
-from fbReadStats import Team
+from makostats.algos import mako
+from makostats.fbReadStats import Team
 import logging
 
 class AlgosTests(TestCase):

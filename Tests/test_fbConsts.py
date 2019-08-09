@@ -1,5 +1,5 @@
 from unittest import TestCase
-from fbConsts import DATA
+from makostats.fbConsts import DATA
 
 
 class ConstsTests(TestCase):
