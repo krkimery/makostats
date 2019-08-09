@@ -1,7 +1,8 @@
 # makostats
+[![Coverage Status](https://coveralls.io/repos/github/krkimery/makostats/badge.svg?branch=master)](https://coveralls.io/github/krkimery/makostats?branch=master)
+
 Football Stats project: scrape for data, then rank teams
 
-[![Coverage Status](https://coveralls.io/repos/github/krkimery/makostats/badge.svg?branch=master)](https://coveralls.io/github/krkimery/makostats?branch=master)
 
 ## Setup
 Must have installed: requests, bs4, mock
