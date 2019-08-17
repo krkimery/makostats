@@ -13,18 +13,18 @@ import json
 #
 ###################################
 
+
 def build_all_teams():
-    '''loads stored Teams, builds from scrape current teams'''
+    """loads stored Teams, builds from scrape current teams"""
     total_dict = {}
     for year in YEARS:
-        total_dict.update(load_all_teams_for_year(year))
-        logging.info("year: {}".format(year))
-        if year in total_dict:
+        logging.info("Building year: {}".format(year))
+        total_dict.update(load_all_teams_for_year(str(year)))
+        if str(year) in total_dict:
             continue
         else:
-            logging.info( "total dict keys: {}".format(total_dict.keys()))
             new_dict = build_all_teams_from_scrape(year)
-            store_data_for_year(year, {year: new_dict})
+            store_data_to_json_for_year(year, new_dict)
             total_dict[year] = new_dict
     return total_dict
 
@@ -59,6 +59,7 @@ class Team(object):
 
     def build_per_game_stats(self):
         total_games = self.Wins_All_Games + self.Losses_All_Games
+        self.Total_Games = total_games
         temp_dict = tuple(self.__dict__.iteritems())
         if total_games != 0.0:
             for attr, val in temp_dict:
@@ -151,6 +152,8 @@ def store_data_to_json_for_year(year, data_dict):
     all_existing_json = load_all_from_json()
     new_stored_json_dict = {}
     for team, teamObj in data_dict.iteritems():
+        if not teamObj:
+            continue
         new_stored_json_dict[team] = teamObj.dump_to_json()
 
     all_existing_json[str(year)] = new_stored_json_dict
@@ -169,20 +172,31 @@ def load_all_teams_for_year(year):
 
     return year_dict
 
+
 def load_from_json(year):
     """Load the stored data from the json data dump"""
     json_data = load_all_from_json()[str(year)]
     logging.info("Loaded JSON data for year: {}".format(year))
-    returned_data = {}
-    for team, team_attrs in json_data.iteritems():
-        returned_data[team] = Team.load_from_json(team_attrs)
-    return returned_data
+    return json_data
+
 
 def load_all_from_json():
     """Load all teams for all years from JSON"""
-    with open(JSON_FILE, "r") as data_file:
-        json_data = json.load(data_file)
-    return json_data
+    returned_data = {}
+    try:
+        with open(JSON_FILE, "r") as data_file:
+            json_data = json.load(data_file)
+        for year in YEARS:
+            returned_data[str(year)] = {}
+            logging.info("Building dict from JSON for year: {}".format(year))
+            for team, team_attrs in json_data[str(year)].iteritems():
+                team_dict = json.loads(team_attrs)
+                returned_data[str(year)][team] = Team.load_from_json(team_dict)
+
+    except Exception as e:
+        logging.warn(str(e))
+        logging.warn("Unable to load json file data: {}".format(JSON_FILE))
+    return returned_data
 
 
 ###################################
@@ -198,6 +212,7 @@ def load_from_pickle(year):
         year_dict.update(pickle.load(f))
         logging.info("Loaded stored data for year: {}".format(year))
     return year_dict
+
 
 def store_data_for_year(year, data_dict):
     """DEPRECATED: Store the data for a given year"""

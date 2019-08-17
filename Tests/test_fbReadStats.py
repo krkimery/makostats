@@ -1,9 +1,10 @@
 from unittest import TestCase
 from makostats.fbReadStats import Team, build_all_teams, build_team_from_scrape, build_all_teams_from_scrape, store_all_data, store_data_to_json_for_year, load_all_teams_for_year, load_all_from_json, load_from_json
-from makostats.fbConsts import DATA
+from makostats.fbConsts import DATA, YEARS
 import json
 import copy
 import mock
+import logging
 
 class TestTeam(TestCase):
 
@@ -35,22 +36,22 @@ class TestTeam(TestCase):
 
 class ModuleTests(TestCase):
 
-    @mock.patch("makostats.fbReadStats.store_data_for_year")
+    @mock.patch("makostats.fbReadStats.store_data_to_json_for_year")
     @mock.patch("makostats.fbReadStats.build_all_teams_from_scrape")
     @mock.patch("makostats.fbReadStats.load_all_teams_for_year")
     def test_build_all_teams(self, mock_load, mock_build, mock_store):
         mock_load.return_value = {
-                                    2008 : "fake data",
-                                    2009: "fake data",
-                                    2010: "fake data",
-                                    2011: "fake data",
-                                    2012: "fake data",
-                                    2013: "fake data",
-                                    2014: "fake data",
-                                    2015: "fake data",
-                                    2016: "fake data",
-                                    2017: "fake data",
-                                    2018: "fake data",
+                                    "2008": "fake data",
+                                    "2009": "fake data",
+                                    "2010": "fake data",
+                                    "2011": "fake data",
+                                    "2012": "fake data",
+                                    "2013": "fake data",
+                                    "2014": "fake data",
+                                    "2015": "fake data",
+                                    "2016": "fake data",
+                                    "2017": "fake data",
+                                    "2018": "fake data",
                                 }
 
         results = build_all_teams()
@@ -58,7 +59,7 @@ class ModuleTests(TestCase):
         self.assertFalse(mock_build.called)
         self.assertFalse(mock_store.called)
 
-        mock_load.return_value = {2010 : "fake data"}
+        mock_load.return_value = {2010: "fake data"}
         _ = build_all_teams()
         self.assertTrue(mock_build.called)
         self.assertEqual(mock_build.call_args[0][0], 2018)
@@ -74,7 +75,7 @@ class ModuleTests(TestCase):
         self.assertEqual(mock_get_html.call_args[0][0], "fake team")
 
         mock_team.side_effect = [Exception,]
-        self.assertIsNone( build_team_from_scrape("fake team", 2020) )
+        self.assertIsNone(build_team_from_scrape("fake team", 2020))
 
     @mock.patch("time.sleep")
     @mock.patch("makostats.fbReadStats.build_team_from_scrape")
@@ -107,19 +108,31 @@ class ModuleTests(TestCase):
         mock_load.side_effect = [{"fake team": "fake data"}, Exception]
         self.assertEqual({"1776": {"fake team": "fake data"}}, load_all_teams_for_year("1776"))
 
-    @mock.patch("makostats.fbReadStats.json.load")
-    @mock.patch("makostats.fbReadStats.open")
-    def test_load_all_from_json(self, mock_open, mock_json):
-        mock_json.return_value = {"fake data": "fake team data"}
-        results = load_all_from_json()
-        self.assertEqual(mock_json.return_value, results)
-        self.assertTrue(mock_open.called)
-
+    @mock.patch("makostats.fbReadStats.json.loads")
     @mock.patch("makostats.fbReadStats.Team.load_from_json")
+    def test_load_all_from_json(self, mock_team_load, mock_loads):
+        mock_team_load.return_value = mock.Mock()
+        returned_data = '{"2008":{"faketeam": "fakedata"},"2009":{},"2010":{},"2011":{},"2012":{},"2013":{},"2014":{},"2015":{},"2016":{},"2017":{}, "2018":{}'
+
+        with mock.patch("makostats.fbReadStats.open", mock.mock_open(read_data=returned_data)) as mock_open:
+             with mock.patch("makostats.fbReadStats.json.load") as mock_json:
+                mock_json.return_value = {"2008":{"faketeam":"fakedata"},"2009":{},"2010":{},"2011":{},"2012":{},"2013":{},"2014":{},"2015":{},"2016":{},"2017":{}, "2018":{}}
+                results = load_all_from_json()
+                logging.info(results)
+                self.assertTrue(mock_json.called)
+                self.assertIsInstance(results, dict)
+                self.assertTrue(mock_open.called)
+                self.assertEqual(sorted(results.keys()), [str(year) for year in YEARS])
+                self.assertEqual(results["2008"]["faketeam"], mock_team_load.return_value)
+
+        with mock.patch("makostats.fbReadStats.open", mock.mock_open(read_data="")) as mock_open:
+            mock_open.side_effect = Exception
+            results = load_all_from_json()
+            self.assertEqual(results, {})
+
     @mock.patch("makostats.fbReadStats.load_all_from_json")
-    def test_load_from_json(self, mock_load, mock_team_load):
-        mock_team_load.return_value = "fake team data"
+    def test_load_from_json(self, mock_load ):
         mock_load.return_value = {"2012": {"fake alabama": {"fake attr": 12}}}
         results = load_from_json(2012)
-        self.assertEqual({"fake alabama": "fake team data"}, results)
+        self.assertEqual({"fake alabama": {"fake attr": 12}}, results)
 
