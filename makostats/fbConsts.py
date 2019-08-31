@@ -9,7 +9,7 @@ HTTP_HEADERS = {
                                             "(KHTML, like Gecko) Chrome/70.0.3538.77 Safari/537.36",
                 }
 
-DATA_FILENAME = os.getcwd() + "\\data\\" + "data_"
+DATA_FILENAME = os.getcwd() + "\\makostats\\data\\" + "data_"
 
 JSON_FILE = "json_data"
 

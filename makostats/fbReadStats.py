@@ -199,6 +199,19 @@ def load_all_from_json():
     return returned_data
 
 
+def scrape_and_pickle_weekly_data(year):
+    """Scrape team data for year, pickle data for each team based off of number of games played"""
+    all_data = {str(week):{} for week in range(15)}
+    teams = build_all_teams_from_scrape(2019)
+    for teamName in teams:
+        if not hasattr(teams[teamName], "team"):
+            logging.warn("Skipping {}".format(teamName))
+            continue
+        all_data[str(int(teams[teamName].Total_Games))][teams[teamName].team] = teams[teamName]
+
+    for week in all_data:
+        store_data_for_year("w"+week, all_data[week])
+
 ###################################
 #
 #  DEPRECATED FUNCTIONS
@@ -216,8 +229,11 @@ def load_from_pickle(year):
 
 def store_data_for_year(year, data_dict):
     """DEPRECATED: Store the data for a given year"""
+    with open(DATA_FILENAME + str(year), "rb") as f:
+        stored_dict = pickle.load(f)
+        stored_dict.update(data_dict)
     with open(DATA_FILENAME + str(year), "wb") as f:
-        pickle.dump(data_dict, f)
+        pickle.dump(stored_dict, f)
     logging.info("Stored data for year: {}".format(year))
 
 
