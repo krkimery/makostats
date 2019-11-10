@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import itertools
+import logging
 
 
 class MakoPlot(object):
@@ -55,16 +56,19 @@ class MakoPlot(object):
             raise NotImplementedError("oops - I haven't done this yet..")
         for attribute in self.attributes:
             for team_name in self.Teams_Array.Teams:
-                format_type = "".join(next(formats))
-                x_vals = []
-                y_vals = []
-                for team_obj in self.Teams_Array.Teams[team_name]:
-                    x_vals.append(100 * team_obj.year + team_obj.Total_Games)
-                    if isinstance(attribute, basestring):
-                        y_vals.append(float(getattr(team_obj, attribute)))
-                    else:
-                        y_vals.append(attribute(team_obj))
-                plt.plot(x_vals, y_vals, format_type, label=team_name)
+                try:
+                    format_type = "".join(next(formats))
+                    x_vals = []
+                    y_vals = []
+                    for team_obj in self.Teams_Array.Teams[team_name]:
+                        x_vals.append(100 * team_obj.year + team_obj.Total_Games)
+                        if isinstance(attribute, basestring):
+                            y_vals.append(float(getattr(team_obj, attribute)))
+                        else:
+                            y_vals.append(attribute(team_obj))
+                    plt.plot(x_vals, y_vals, format_type, label=team_name)
+                except:
+                    logging.warn("Failed to plot team: {}, attr: {}".format(team_name,attribute))
         plt.legend()
         plt.show()
 
